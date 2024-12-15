@@ -17,6 +17,7 @@ import { Image } from "expo-image";
 import { downloadFile, getSupabaseFileUrl } from "../services/imageService";
 import { Video } from "expo-av";
 import { createPostLike, removePostLike } from "../services/postService";
+import Loading from "../components/Loading";
 
 const textStyle = {
   color: theme.colors.dark,
@@ -33,7 +34,16 @@ const tagsStyles = {
     color: theme.colors.dark,
   },
 };
-const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
+const PostCard = ({
+  item,
+  currentUser,
+  router,
+  hasShadow = true,
+  showMoreIcons = true,
+  showDelete = false,
+  onDelete = () => {},
+  onEdit = () => {},
+}) => {
   const shadowStyles = {
     shadowOffset: {
       width: 0,
@@ -45,17 +55,23 @@ const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
   };
 
   const [likes, setLikes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLikes(item?.postLikes);
   }, []);
 
-  const openPostDetails = () => {};
+  const openPostDetails = () => {
+    if (!showMoreIcons) return null;
+    router.push({ pathname: "postDetails", params: { postId: item?.id } });
+  };
   const onShare = async () => {
     let content = { message: stripHtmlTags(item?.body) };
     if (item?.file) {
       // download the file then share the local uri
+      setLoading(true);
       let url = await downloadFile(getSupabaseFileUrl(item?.file).uri);
+      setLoading(false);
       content.url = url;
     }
     Share.share(content);
@@ -83,6 +99,20 @@ const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
       }
     }
   };
+  const handlePostDelete = () => {
+    Alert.alert("Confirm", "Are you sure you want to do this?", [
+      {
+        text: "Cancel",
+        onPress: () => {},
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: () => onDelete(item),
+        style: "destructive",
+      },
+    ]);
+  };
   const created_at = moment(item?.created_at).format("MMM D");
   const liked = likes.filter((like) => like.userId == currentUser?.id)[0]
     ? true
@@ -102,14 +132,26 @@ const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
           </View>
         </View>
 
-        <TouchableOpacity onPress={openPostDetails}>
-          <Icon
-            name={"threeDotsHorizontal"}
-            size={hp(3.4)}
-            strokeWidth={3}
-            color={theme.colors.text}
-          />
-        </TouchableOpacity>
+        {showMoreIcons && (
+          <TouchableOpacity onPress={openPostDetails}>
+            <Icon
+              name={"threeDotsHorizontal"}
+              size={hp(3.4)}
+              strokeWidth={3}
+              color={theme.colors.text}
+            />
+          </TouchableOpacity>
+        )}
+        {showDelete && currentUser.id == item?.userId && (
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={() => onEdit(item)}>
+              <Icon name={"edit"} size={hp(2.5)} color={theme.colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handlePostDelete}>
+              <Icon name={"delete"} size={hp(2.5)} color={theme.colors.rose} />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
       {/* Post body & media */}
       <View style={styles.content}>
@@ -157,15 +199,19 @@ const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
           <Text style={styles.count}>{likes?.length}</Text>
         </View>
         <View style={styles.footerButton}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={openPostDetails}>
             <Icon name={"comment"} size={24} color={theme.colors.textLight} />
           </TouchableOpacity>
-          <Text style={styles.count}>{0}</Text>
+          <Text style={styles.count}>{item?.comments[0]?.count}</Text>
         </View>
         <View style={styles.footerButton}>
-          <TouchableOpacity onPress={onShare}>
-            <Icon name={"share"} size={24} color={theme.colors.textLight} />
-          </TouchableOpacity>
+          {loading ? (
+            <Loading size={"small"} />
+          ) : (
+            <TouchableOpacity onPress={onShare}>
+              <Icon name={"share"} size={24} color={theme.colors.textLight} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
