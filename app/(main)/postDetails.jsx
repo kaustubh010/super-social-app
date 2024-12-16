@@ -24,9 +24,10 @@ import Icon from "../../assets/icons";
 import CommentItem from "../../components/CommentItem";
 import { supabase } from "../../lib/supabase";
 import { getUserData } from "../../services/userService";
+import { createNotification } from "../../services/notificationService";
 
 const PostDetails = () => {
-  const { postId } = useLocalSearchParams();
+  const { postId, commentId } = useLocalSearchParams();
   const { user } = useAuth();
   const router = useRouter();
   const [startLoading, setStartLoading] = useState(true);
@@ -54,7 +55,12 @@ const PostDetails = () => {
       .channel("comments")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "comments" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "comments",
+          filter: `postId=eq.${postId}`,
+        },
         handleNewComment
       )
       .subscribe();
@@ -84,7 +90,16 @@ const PostDetails = () => {
     let res = await createComment(data);
     setLoading(false);
     if (res.success) {
-      // send notification later
+      if (user.id != post.userId) {
+        // send notification
+        let notify = {
+          senderId: user.id,
+          receiverId: post.userId,
+          title: "Commented on your post",
+          data: JSON.stringify({ postId: post.id, commentId: res?.data?.id }),
+        };
+        createNotification(notify);
+      }
       inputRef?.current.clear();
       commentRef.current = "";
     } else {
@@ -188,6 +203,7 @@ const PostDetails = () => {
               key={comment?.id?.toString()}
               item={comment}
               onDelete={onDeleteComment}
+              highlight={comment.id == commentId}
               canDelete={user.id == comment.userId || user.id == post.userId}
             />
           ))}
