@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "super-social-app",
+    "name": "samidhyadhan",
     "slug": "super-social-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kaustubh010.supersocialapp"
     },
     "web": {
       "bundler": "metro",

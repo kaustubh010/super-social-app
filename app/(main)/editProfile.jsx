@@ -20,6 +20,7 @@ import Button from "../../components/Button";
 import { updateUser } from "../../services/userService";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import BottomNavbar from "../../components/BottomNavbar";
 
 const EditProfile = () => {
   const router = useRouter();
@@ -132,6 +133,7 @@ const EditProfile = () => {
           </View>
         </ScrollView>
       </View>
+      <BottomNavbar user={user} />
     </ScreenWrapper>
   );
 };

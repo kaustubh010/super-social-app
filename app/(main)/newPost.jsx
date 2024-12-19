@@ -23,6 +23,7 @@ import * as ImagePicker from "expo-image-picker";
 import { getSupabaseFileUrl } from "../../services/imageService";
 import { Video } from "expo-av";
 import { createOrUpdatePost } from "../../services/postService";
+import BottomNavbar from "../../components/BottomNavbar";
 
 const NewPost = () => {
   const post = useLocalSearchParams();
@@ -99,7 +100,7 @@ const NewPost = () => {
       userId: user?.id,
     };
 
-    if (post && post.id) data.id = post.id
+    if (post && post.id) data.id = post.id;
 
     setLoading(true);
     let res = await createOrUpdatePost(data);

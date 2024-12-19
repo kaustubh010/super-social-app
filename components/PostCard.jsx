@@ -1,5 +1,6 @@
 import {
   Alert,
+  Button,
   Share,
   StyleSheet,
   Text,
@@ -61,6 +62,13 @@ const PostCard = ({
     setLikes(item?.postLikes);
   }, []);
 
+  const openUserProfile = () => {
+    router.push({
+      pathname: "profile",
+      params: { userId: item.userId },
+    });
+  };
+
   const openPostDetails = () => {
     if (!showMoreIcons) return null;
     router.push({ pathname: "postDetails", params: { postId: item?.id } });
@@ -76,6 +84,7 @@ const PostCard = ({
     }
     Share.share(content);
   };
+
   const onLike = async () => {
     if (liked) {
       // remove like
@@ -99,6 +108,7 @@ const PostCard = ({
       }
     }
   };
+
   const handlePostDelete = () => {
     Alert.alert("Confirm", "Are you sure you want to do this?", [
       {
@@ -113,14 +123,16 @@ const PostCard = ({
       },
     ]);
   };
+
   const created_at = moment(item?.created_at).format("MMM D");
   const liked = likes.filter((like) => like.userId == currentUser?.id)[0]
     ? true
     : false;
+
   return (
     <View style={[styles.container, hasShadow && shadowStyles]}>
       <View style={styles.header}>
-        <View style={styles.userInfo}>
+        <TouchableOpacity onPress={openUserProfile} style={styles.userInfo}>
           <Avatar
             size={hp(4.5)}
             uri={item?.user?.image}
@@ -130,7 +142,7 @@ const PostCard = ({
             <Text style={styles.username}>{item?.user?.name}</Text>
             <Text style={styles.postTime}>{created_at}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {showMoreIcons && (
           <TouchableOpacity onPress={openPostDetails}>

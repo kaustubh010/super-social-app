@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 import { hp, wp } from "../../helpers/common";
@@ -20,13 +20,22 @@ import { fetchPosts } from "../../services/postService";
 import PostCard from "../../components/PostCard";
 import Loading from "../../components/Loading";
 import { FlatList } from "react-native";
+import { getUserData } from "../../services/userService";
+import {
+  followUser,
+  isFollowing,
+  unfollowUser,
+} from "../../services/followService";
+import { createNotification } from "../../services/notificationService";
+import BottomNavbar from "../../components/BottomNavbar";
 
 var limit = 0;
 const Profile = () => {
-  const { user, setAuth } = useAuth();
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const router = useRouter();
+  const { userId } = useLocalSearchParams();
   const onLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -36,10 +45,18 @@ const Profile = () => {
   const getPosts = async () => {
     if (!hasMore) return null;
     limit = limit + 10;
-    let res = await fetchPosts(limit, user.id);
-    if (res.success) {
-      if (posts.length == res.data.length) setHasMore(false);
-      setPosts(res.data);
+    if (userId) {
+      let res = await fetchPosts(limit, userId);
+      if (res.success) {
+        if (posts.length == res.data.length) setHasMore(false);
+        setPosts(res.data);
+      }
+    } else {
+      let res = await fetchPosts(limit, user.id);
+      if (res.success) {
+        if (posts.length == res.data.length) setHasMore(false);
+        setPosts(res.data);
+      }
     }
   };
   const handleLogout = async () => {
@@ -86,54 +103,136 @@ const Profile = () => {
           )
         }
       />
+      <BottomNavbar user={user} />
     </ScreenWrapper>
   );
 };
 
 const UseHeader = ({ user, router, handleLogout }) => {
+  const { userId } = useLocalSearchParams();
+  const [profile, setProfile] = useState(user);
+  const [followed, setFollowed] = useState(false);
+
+  const fetchUser = async () => {
+    if (userId) {
+      let res = await getUserData(userId);
+      if (res.success) {
+        setProfile(res.data);
+      }
+      if (userId == user.id) {
+        setProfile(user);
+      }
+    }
+  };
+
+  const onFollow = async () => {
+    if (followed) {
+      // Unfollow User
+      let res = await unfollowUser(user.id, userId);
+      if (res.success) {
+        setFollowed(false);
+      }
+    } else {
+      // Follow User
+      let data = {
+        follower_id: user.id,
+        following_id: userId,
+      };
+      let res = await followUser(data);
+      if (res.success) {
+        setFollowed(true);
+        if (user.id != userId) {
+          // send notification
+          let notify = {
+            senderId: user.id,
+            receiverId: userId,
+            title: "Followed You",
+          };
+          createNotification(notify);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+    // Check if currentUser is following the post's user
+    const checkFollowStatus = async () => {
+      if (user && userId) {
+        const following = await isFollowing(user.id, userId);
+        setFollowed(following); // Update the followed state
+      }
+    };
+
+    checkFollowStatus();
+  }, []);
+
   return (
     <View
       style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
     >
       <View>
         <Header title={"Profile"} mb={30} />
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Icon name={"logout"} color={theme.colors.rose} />
-        </TouchableOpacity>
+        {!userId && (
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Icon name={"logout"} color={theme.colors.rose} />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.container}>
         <View style={{ gap: 15 }}>
           <View style={styles.avatarContainer}>
             <Avatar
-              uri={user?.image}
+              uri={profile?.image}
               size={hp(12)}
               rounded={theme.radius.xxl * 1.4}
             />
-            <Pressable
-              style={styles.editIcon}
-              onPress={() => router.push("editProfile")}
-            >
-              <Icon name={"edit"} strokeWidth={2.5} size={20} />
-            </Pressable>
+            {!userId && (
+              <Pressable
+                style={styles.editIcon}
+                onPress={() => router.push("editProfile")}
+              >
+                <Icon name={"edit"} strokeWidth={2.5} size={20} />
+              </Pressable>
+            )}
           </View>
           <View style={{ alignItems: "center", gap: 4 }}>
-            <Text style={styles.userName}>{user && user.name}</Text>
-            <Text style={styles.infoText}>{user && user.address}</Text>
+            <Text style={styles.userName}>{profile && profile?.name}</Text>
+            {!userId && (
+              <Text style={styles.infoText}>{profile && profile?.address}</Text>
+            )}
           </View>
           <View style={{ gap: 10 }}>
-            <View style={styles.info}>
-              <Icon name={"mail"} size={20} color={theme.colors.textLight} />
-              <Text style={styles.infoText}>{user && user.email}</Text>
-            </View>
-            {user && user.phoneNumber && (
+            {!userId && (
               <View style={styles.info}>
-                <Icon name={"call"} size={20} color={theme.colors.textLight} />
-                <Text style={styles.infoText}>{user && user.phoneNumber}</Text>
+                <Icon name={"mail"} size={20} color={theme.colors.textLight} />
+                <Text style={styles.infoText}>{profile && profile.email}</Text>
               </View>
             )}
-            {user && user.bio && (
-              <Text style={styles.infoText}>{user.bio}</Text>
+            {!userId && profile && profile.phoneNumber && (
+              <View style={styles.info}>
+                <Icon name={"call"} size={20} color={theme.colors.textLight} />
+                <Text style={styles.infoText}>
+                  {profile && profile.phoneNumber}
+                </Text>
+              </View>
             )}
+            {profile && profile.bio && (
+              <Text style={styles.infoText}>{profile.bio}</Text>
+            )}
+            {userId && userId !== user.id && <View style={{ alignItems: "center" }}>
+              <TouchableOpacity
+                style={[
+                  styles.followButton,
+                  followed && { backgroundColor: theme.colors.gray },
+                ]}
+                onPress={onFollow}
+              >
+                <Text style={styles.followText}>
+                  {followed ? "Followed" : "Follow"}
+                </Text>
+              </TouchableOpacity>
+            </View>}
           </View>
         </View>
       </View>
@@ -203,5 +302,20 @@ const styles = StyleSheet.create({
     fontSize: hp(2),
     textAlign: "center",
     color: theme.colors.text,
+  },
+  followButton: {
+    height: hp(4.5), // Adjust button height
+    width: wp(80), // Add a fixed width for a compact look
+    borderRadius: theme.radius.md, // Add rounded corners
+    paddingVertical: hp(0.5), // Adjust vertical padding
+    paddingHorizontal: wp(2), // Adjust horizontal padding
+    backgroundColor: theme.colors.primaryDark, // Example color: iOS-like blue
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  followText: {
+    fontSize: hp(2), // Smaller font size
+    color: "white", // White text for contrast
+    fontWeight: theme.fonts.semibold, // Slightly bold text
   },
 });

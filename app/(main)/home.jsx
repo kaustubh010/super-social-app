@@ -21,10 +21,11 @@ import { fetchPosts } from "../../services/postService";
 import PostCard from "../../components/PostCard";
 import Loading from "../../components/Loading";
 import { getUserData } from "../../services/userService";
+import BottomNavbar from "../../components/BottomNavbar";
 
 var limit = 0;
 const Home = () => {
-  const { user, setAuth } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [posts, setPosts] = useState([]);
@@ -113,7 +114,7 @@ const Home = () => {
       <StatusBar style="dark" />
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>LinkUp</Text>
+          <Text style={styles.title}>Samidha Dhan</Text>
           <View style={styles.icons}>
             <Pressable
               onPress={() => {
@@ -122,7 +123,7 @@ const Home = () => {
               }}
             >
               <Icon
-                name="heart"
+                name="notification"
                 size={hp(3.2)}
                 strokeWidth={2}
                 color={theme.colors.text}
@@ -178,6 +179,7 @@ const Home = () => {
           }
         />
       </View>
+      <BottomNavbar user={user} />
     </ScreenWrapper>
   );
 };

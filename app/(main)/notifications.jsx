@@ -8,6 +8,7 @@ import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import NotificationItem from "../../components/NotificationItem";
 import Header from "../../components/Header";
+import BottomNavbar from "../../components/BottomNavbar";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -26,21 +27,22 @@ const Notifications = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <Header title={"Notifications"}/>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listStyle}
-      >
-        {notifications.map((item) => {
-          return (
-            <NotificationItem item={item} key={item?.id} router={router} />
-          );
-        })}
-        {notifications.length == 0 && (
-          <Text style={styles.noData}>No notifications yet</Text>
-        )}
-      </ScrollView>
+        <Header title={"Notifications"} />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listStyle}
+        >
+          {notifications.map((item) => {
+            return (
+              <NotificationItem item={item} key={item?.id} router={router} />
+            );
+          })}
+          {notifications.length == 0 && (
+            <Text style={styles.noData}>No notifications yet</Text>
+          )}
+        </ScrollView>
       </View>
+      <BottomNavbar user={user} />
     </ScreenWrapper>
   );
 };
