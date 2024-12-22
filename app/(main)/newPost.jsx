@@ -119,7 +119,7 @@ const NewPost = () => {
     <ScreenWrapper>
       <View style={styles.container}>
         <Header title={"Create Post"} />
-        <ScrollView contentContainerStyle={{ gap: 20 }}>
+        <ScrollView contentContainerStyle={{ gap: 20 }} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Avatar
               uri={user?.image}

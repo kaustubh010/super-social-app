@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
   // Bottom Navbar Styles
   bottomNavbar: {
     position: "absolute",
-    borderRadius: theme.radius.xxl,
-    bottom: 2,
+    borderRadius: theme.radius.sm,
+    bottom: 0,
     width: "95%",
     backgroundColor: "rgba(255, 255, 255, 0.9)",  // Semi-transparent white background
     backdropFilter: "blur(10px)",  // Apply blur effect to make it look like frosted glass

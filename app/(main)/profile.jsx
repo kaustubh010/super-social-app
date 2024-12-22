@@ -98,7 +98,9 @@ const Profile = () => {
             </View>
           ) : (
             <View style={{ marginVertical: 30 }}>
-              <Text style={styles.noPosts}>No more posts</Text>
+              <Text style={styles.noPosts}>
+                {posts.length == 0 ? "Post something here!" : "No more posts"}
+              </Text>
             </View>
           )
         }
@@ -198,9 +200,7 @@ const UseHeader = ({ user, router, handleLogout }) => {
           </View>
           <View style={{ alignItems: "center", gap: 4 }}>
             <Text style={styles.userName}>{profile && profile?.name}</Text>
-            {!userId && (
-              <Text style={styles.infoText}>{profile && profile?.address}</Text>
-            )}
+            <Text style={styles.infoText}>{profile && profile?.userName}</Text>
           </View>
           <View style={{ gap: 10 }}>
             {!userId && (
@@ -217,22 +217,32 @@ const UseHeader = ({ user, router, handleLogout }) => {
                 </Text>
               </View>
             )}
+            {!userId && profile && profile.address && (
+              <View style={styles.info}>
+                <Icon name={"location"} size={20} color={theme.colors.textLight} />
+                <Text style={styles.infoText}>
+                  {profile && profile.address}
+                </Text>
+              </View>
+            )}
             {profile && profile.bio && (
               <Text style={styles.infoText}>{profile.bio}</Text>
             )}
-            {userId && userId !== user.id && <View style={{ alignItems: "center" }}>
-              <TouchableOpacity
-                style={[
-                  styles.followButton,
-                  followed && { backgroundColor: theme.colors.gray },
-                ]}
-                onPress={onFollow}
-              >
-                <Text style={styles.followText}>
-                  {followed ? "Followed" : "Follow"}
-                </Text>
-              </TouchableOpacity>
-            </View>}
+            {userId && userId !== user.id && (
+              <View style={{ alignItems: "center" }}>
+                <TouchableOpacity
+                  style={[
+                    styles.followButton,
+                    followed && { backgroundColor: theme.colors.gray },
+                  ]}
+                  onPress={onFollow}
+                >
+                  <Text style={styles.followText}>
+                    {followed ? "Followed" : "Follow"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </View>

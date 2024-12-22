@@ -1,4 +1,11 @@
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { StatusBar } from "expo-status-bar";
@@ -58,7 +65,10 @@ const SignUp = () => {
           <Text style={styles.welcomeText}>Get Started</Text>
         </View>
         {/* form */}
-        <View style={styles.form}>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
             Please fill the details to create an account
           </Text>
@@ -79,28 +89,28 @@ const SignUp = () => {
             onChangeText={(value) => (passwordRef.current = value)}
           />
           <Button title={"Sign up"} loading={loading} onPress={onSubmit} />
-        </View>
-        {/* footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account?</Text>
-          <Pressable
-            onPress={() => {
-              router.push("login");
-            }}
-          >
-            <Text
-              style={[
-                styles.footerText,
-                {
-                  color: theme.colors.primaryDark,
-                  fontWeight: theme.fonts.semibold,
-                },
-              ]}
+          {/* footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account?</Text>
+            <Pressable
+              onPress={() => {
+                router.push("login");
+              }}
             >
-              Login
-            </Text>
-          </Pressable>
-        </View>
+              <Text
+                style={[
+                  styles.footerText,
+                  {
+                    color: theme.colors.primaryDark,
+                    fontWeight: theme.fonts.semibold,
+                  },
+                ]}
+              >
+                Login
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
       </View>
     </ScreenWrapper>
   );
