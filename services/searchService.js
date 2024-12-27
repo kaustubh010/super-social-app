@@ -5,7 +5,7 @@ export const searchUsers = async (keyword) => {
     const { data, error } = await supabase
       .from("users")
       .select()
-      .or(`name.ilike.%${keyword}%,userName.ilike.%${keyword}%`); // Searches for matches in both `name` and `userName` columns
+      .or(`name.ilike.%${keyword}%,username.ilike.%${keyword}%`); // Searches for matches in both `name` and `userName` columns
 
     if (error) {
       return { success: false, msg: error.message };

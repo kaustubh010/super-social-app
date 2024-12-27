@@ -6,7 +6,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
+
 import React, { useEffect, useState } from "react";
 import { theme } from "../constants/theme";
 import { hp, stripHtmlTags, wp } from "../helpers/common";
@@ -19,6 +21,7 @@ import { downloadFile, getSupabaseFileUrl } from "../services/imageService";
 import { Video } from "expo-av";
 import { createPostLike, removePostLike } from "../services/postService";
 import Loading from "../components/Loading";
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const textStyle = {
   color: theme.colors.dark,
@@ -57,10 +60,22 @@ const PostCard = ({
 
   const [likes, setLikes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
 
   useEffect(() => {
     setLikes(item?.postLikes);
   }, []);
+
+  const handleFullscreenUpdate = async (event) => {
+    if (event.fullscreenUpdate === Video.FULLSCREEN_UPDATE_ENTER) {
+      // Entering fullscreen - lock to landscape
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    } else if (event.fullscreenUpdate === Video.FULLSCREEN_UPDATE_EXIT) {
+      // Exiting fullscreen - reset to default
+      await ScreenOrientation.unlockAsync();
+    }
+  };
+  
 
   const openUserProfile = () => {
     router.push({
@@ -176,14 +191,39 @@ const PostCard = ({
             />
           )}
         </View>
-        {/* Post Image */}
-        {item?.file && item?.file?.includes("postImages") && (
-          <Image
-            source={getSupabaseFileUrl(item?.file)}
-            transition={100}
-            style={styles.postMedia}
-            contentFit="cover"
-          />
+        {/* Post Image with TouchableOpacity */}
+        {item?.file && item?.file.includes("postImages") && (
+          <>
+            <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+              <Image
+                source={getSupabaseFileUrl(item?.file)}
+                transition={100}
+                style={styles.postMedia}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+
+            {/* Fullscreen Modal */}
+            <Modal
+              visible={isModalVisible}
+              onRequestClose={() => setIsModalVisible(false)}
+              transparent={true}
+              animationType="fade"
+            >
+              <View style={styles.modalContainer}>
+                <Image
+                  source={getSupabaseFileUrl(item?.file)}
+                  style={styles.fullscreenImage}
+                />
+                <TouchableOpacity
+                  onPress={() => setIsModalVisible(false)}
+                  style={styles.closeButton}
+                >
+                  <Text style={styles.closeText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+          </>
         )}
 
         {/* post video */}
@@ -194,6 +234,7 @@ const PostCard = ({
             useNativeControls
             resizeMode="cover"
             isLooping
+            onFullscreenUpdate={handleFullscreenUpdate}
           />
         )}
       </View>
@@ -294,5 +335,28 @@ const styles = StyleSheet.create({
   count: {
     color: theme.colors.text,
     fontSize: hp(1.8),
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // Semi-transparent background
+  },
+  fullscreenImage: {
+    width: "90%",
+    height: "80%",
+    resizeMode: "contain",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 30,
+    right: 20,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 20,
+  },
+  closeText: {
+    fontSize: 16,
+    color: "black",
   },
 });

@@ -56,6 +56,7 @@ const SearchItem = ({ item, router }) => {
             senderId: item.id,
             receiverId: user.id,
             title: "Followed You",
+            data: JSON.stringify({ userId: item.id }),
           };
           createNotification(notify);
         }
@@ -70,7 +71,7 @@ const SearchItem = ({ item, router }) => {
         <View style={styles.textAndButtons}>
           <View style={styles.textSection}>
             <Text style={styles.name}>{item?.name}</Text>
-            <Text style={styles.userName}>{item?.userName}</Text>
+            <Text style={styles.userName}>{item?.username}</Text>
           </View>
           <View style={styles.buttonsContainer}>
             {item.id !== user.id && (

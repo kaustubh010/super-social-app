@@ -1,3 +1,4 @@
-export const supabaseUrl = "http://46.202.164.76:8000";
-export const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE";
+import Constants from 'expo-constants';
+
+export const supabaseUrl = Constants.expoConfig.extra.SUPABASE_URL;
+export const supabaseAnonKey = Constants.expoConfig.extra.SUPABASE_ANON_KEY;

@@ -14,13 +14,13 @@ import Header from "../../components/Header";
 import { Image } from "expo-image";
 import { useAuth } from "../../contexts/AuthContext";
 import { getUserImageSrc, uploadFile } from "../../services/imageService";
+import { checkUsernameAvailability } from "../../services/userService";
 import Icon from "../../assets/icons";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { updateUser } from "../../services/userService";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import BottomNavbar from "../../components/BottomNavbar";
 
 const EditProfile = () => {
   const router = useRouter();
@@ -33,6 +33,7 @@ const EditProfile = () => {
     image: null,
     bio: "",
     address: "",
+    username: "",
   });
 
   useEffect(() => {
@@ -43,6 +44,7 @@ const EditProfile = () => {
         image: currentUser.image || null,
         bio: currentUser.bio || "",
         address: currentUser.address || "",
+        username: currentUser.username || "",
       });
     }
   }, [currentUser]);
@@ -62,25 +64,53 @@ const EditProfile = () => {
 
   const onSubmit = async () => {
     let userData = { ...user };
-    let { name, phoneNumber, address, image, bio } = userData;
-    if (!name || !phoneNumber || !address || !bio || !image) {
+    let { name, phoneNumber, address, image, bio, username } = userData;
+
+    if (!name || !phoneNumber || !address || !bio || !username) {
       Alert.alert("Profile", "Please fill all the fields");
       return;
     }
+
     setLoading(true);
 
-    if (typeof image == "object") {
-      let imageRes = await uploadFile("profiles", image?.uri, true);
-      if (imageRes.success) userData.image = imageRes.data;
-      else userData.image = null;
-    }
+    try {
+      // ✅ Check if username is available
+      const isAvailable = await checkUsernameAvailability(
+        username,
+        currentUser?.id
+      );
+      if (!isAvailable) {
+        Alert.alert(
+          "Profile",
+          "This username is already taken. Please choose another one."
+        );
+        setLoading(false);
+        return;
+      }
 
-    const res = await updateUser(currentUser?.id, userData);
-    setLoading(false);
+      // ✅ Handle image upload if image is updated
+      if (typeof image === "object") {
+        let imageRes = await uploadFile("profiles", image?.uri, true);
+        if (imageRes.success) userData.image = imageRes.data;
+        else userData.image = null;
+      }
 
-    if (res.success) {
-      setUserData({ ...currentUser, ...userData });
-      router.back();
+      // ✅ Update user profile
+      const res = await updateUser(currentUser?.id, userData);
+
+      if (res.success) {
+        setUserData({ ...currentUser, ...userData });
+        router.back();
+      } else {
+        throw new Error("Failed to update profile");
+      }
+    } catch (error) {
+      Alert.alert(
+        "Profile Update Error",
+        error.message || "An unexpected error occurred."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,6 +141,12 @@ const EditProfile = () => {
               onChangeText={(value) => setUser({ ...user, name: value })}
             />
             <Input
+              icon={<Icon name={"user"} />}
+              placeholder="Enter your userName"
+              value={user.username}
+              onChangeText={(value) => setUser({ ...user, username: value })}
+            />
+            <Input
               icon={<Icon name={"call"} />}
               placeholder="Enter your Phone Number"
               value={user.phoneNumber}
@@ -133,7 +169,6 @@ const EditProfile = () => {
           </View>
         </ScrollView>
       </View>
-      <BottomNavbar user={user} />
     </ScreenWrapper>
   );
 };

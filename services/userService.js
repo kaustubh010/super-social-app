@@ -17,6 +17,21 @@ export const getUserData = async (userId) => {
   }
 };
 
+export const checkUsernameAvailability = async (username, userId) => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id')
+    .eq('username', username)
+    .neq('id', userId) // Exclude the current user's ID
+    .maybeSingle(); // Expect one record or null
+
+  if (error) {
+    throw error;
+  }
+
+  return data === null; // If data is null, username is available
+};
+
 export const updateUser = async (userId, data) => {
   try {
     const { error } = await supabase

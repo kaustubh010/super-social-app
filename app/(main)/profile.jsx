@@ -99,7 +99,7 @@ const Profile = () => {
           ) : (
             <View style={{ marginVertical: 30 }}>
               <Text style={styles.noPosts}>
-                {posts.length == 0 ? "Post something here!" : "No more posts"}
+                {posts.length == 0 ? "No posts" : "No more posts"}
               </Text>
             </View>
           )
@@ -149,6 +149,7 @@ const UseHeader = ({ user, router, handleLogout }) => {
             senderId: user.id,
             receiverId: userId,
             title: "Followed You",
+            data: JSON.stringify({ userId: user.id }),
           };
           createNotification(notify);
         }
@@ -158,16 +159,15 @@ const UseHeader = ({ user, router, handleLogout }) => {
 
   useEffect(() => {
     fetchUser();
-    // Check if currentUser is following the post's user
     const checkFollowStatus = async () => {
-      if (user && userId) {
+      if (user.id && userId) {
         const following = await isFollowing(user.id, userId);
         setFollowed(following); // Update the followed state
       }
     };
 
     checkFollowStatus();
-  }, []);
+  }, [user, userId]);
 
   return (
     <View
@@ -200,7 +200,7 @@ const UseHeader = ({ user, router, handleLogout }) => {
           </View>
           <View style={{ alignItems: "center", gap: 4 }}>
             <Text style={styles.userName}>{profile && profile?.name}</Text>
-            <Text style={styles.infoText}>{profile && profile?.userName}</Text>
+            <Text style={styles.infoText}>{profile && profile?.username}</Text>
           </View>
           <View style={{ gap: 10 }}>
             {!userId && (
@@ -219,7 +219,11 @@ const UseHeader = ({ user, router, handleLogout }) => {
             )}
             {!userId && profile && profile.address && (
               <View style={styles.info}>
-                <Icon name={"location"} size={20} color={theme.colors.textLight} />
+                <Icon
+                  name={"location"}
+                  size={20}
+                  color={theme.colors.textLight}
+                />
                 <Text style={styles.infoText}>
                   {profile && profile.address}
                 </Text>

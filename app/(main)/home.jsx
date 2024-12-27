@@ -15,7 +15,6 @@ import { theme } from "../../constants/theme";
 import { StatusBar } from "expo-status-bar";
 import Icon from "../../assets/icons";
 import { useRouter } from "expo-router";
-import Avatar from "../../components/Avatar";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchPosts } from "../../services/postService";
 import PostCard from "../../components/PostCard";
@@ -160,11 +159,11 @@ const Home = () => {
           onEndReachedThreshold={0}
           ListFooterComponent={
             hasMore ? (
-              <View style={{ marginVertical: posts.length == 0 ? 200 : 30 }}>
+              <View style={{ marginVertical: posts.length == 0 ? 200 : 40 }}>
                 <Loading />
               </View>
             ) : (
-              <View style={{ marginVertical: 30 }}>
+              <View style={{ marginVertical: 40 }}>
                 <Text style={styles.noPosts}>No more posts</Text>
               </View>
             )

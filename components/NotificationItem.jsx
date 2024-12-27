@@ -9,8 +9,14 @@ const NotificationItem = ({ item, router }) => {
   const handleClick = () => {
     // Open post details
     if (item?.data) {
-      let { postId, commentId } = JSON.parse(item?.data);
-      router.push({ pathname: "postDetails", params: { postId, commentId } });
+      if (item?.title == "Commented on your post") {
+        let { postId, commentId } = JSON.parse(item?.data);
+        router.push({ pathname: "postDetails", params: { postId, commentId } });
+      }
+      if (item?.title == "Followed You") {
+        let { userId } = JSON.parse(item?.data);
+        router.push({ pathname: "profile", params: { userId } });
+      }
     } else {
       return null;
     }

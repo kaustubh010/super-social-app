@@ -25,6 +25,36 @@ const SignUp = () => {
   const passwordRef = useRef("");
   const [loading, setLoading] = useState(false);
 
+  const generateUsername = async (name) => {
+    if (!name) return `user_${Date.now()}`;
+
+    let baseUsername = name.trim().toLowerCase().replace(/\s+/g, "_");
+    let uniqueUsername = baseUsername;
+
+    let counter = 0;
+    let isUnique = false;
+
+    while (!isUnique) {
+      const { data, error } = await supabase
+        .from("users")
+        .select("username")
+        .eq("username", uniqueUsername);
+
+      if (error) {
+        throw new Error("Error checking username availability");
+      }
+
+      if (data.length === 0) {
+        isUnique = true; // Username is unique
+      } else {
+        counter++;
+        uniqueUsername = `${baseUsername}_${counter}`;
+      }
+    }
+
+    return uniqueUsername;
+  };
+
   const onSubmit = async () => {
     if (!nameRef || !emailRef.current || !passwordRef.current) {
       Alert.alert("Sign Up", "please fill all the details");
@@ -35,22 +65,47 @@ const SignUp = () => {
 
     setLoading(true);
 
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
+    try {
+      // Step 1: Sign Up the User
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name, // Add name to metadata
+          },
         },
-      },
-    });
+      });
 
-    setLoading(false);
-    if (error) {
-      Alert.alert("Sign Up", error.message);
+      if (error) {
+        throw error;
+      }
+
+      const user = data?.user;
+      if (!user) {
+        throw new Error("User not created");
+      }
+
+      // Step 2: Generate a Unique Username
+      const username = await generateUsername(name);
+
+      // Step 3: Update the User in the Database with the Unique Username
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ username })
+        .eq("id", user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+    } catch (error) {
+      Alert.alert(
+        "Sign Up Error",
+        error.message || "An unexpected error occurred."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
