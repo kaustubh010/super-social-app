@@ -1,5 +1,6 @@
 import {
   Alert,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -228,6 +229,36 @@ const UseHeader = ({ user, router, handleLogout }) => {
                   {profile && profile.address}
                 </Text>
               </View>
+            )}
+            {profile && profile.instagram && (
+              <TouchableOpacity onPress={() => Linking.openURL(profile.instagram)} style={[styles.info, { paddingVertical: 5 }]}>
+                <Icon
+                  name={"instagram"}
+                  size={20}
+                  color={theme.colors.textLight}
+                />
+                <Text style={styles.infoText}>Instagram</Text>
+              </TouchableOpacity>
+            )}
+            {profile && profile.facebook && (
+              <TouchableOpacity onPress={() => Linking.openURL(profile.facebook)} style={[styles.info, { paddingVertical: 5 }]}>
+                <Icon
+                  name={"facebook"}
+                  size={20}
+                  color={theme.colors.textLight}
+                />
+                <Text style={styles.infoText}>Facebook</Text>
+              </TouchableOpacity>
+            )}
+            {profile && profile.linkedin && (
+              <TouchableOpacity onPress={() => Linking.openURL(profile.linkedin)} style={[styles.info, { paddingVertical: 5 }]}>
+                <Icon
+                  name={"linkedin"}
+                  size={20}
+                  color={theme.colors.textLight}
+                />
+                <Text style={styles.infoText}>Linkedin</Text>
+              </TouchableOpacity>
             )}
             {profile && profile.bio && (
               <Text style={styles.infoText}>{profile.bio}</Text>

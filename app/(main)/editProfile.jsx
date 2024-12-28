@@ -34,6 +34,9 @@ const EditProfile = () => {
     bio: "",
     address: "",
     username: "",
+    instagram: "",
+    facebook: "",
+    linkedin: "",
   });
 
   useEffect(() => {
@@ -45,6 +48,9 @@ const EditProfile = () => {
         bio: currentUser.bio || "",
         address: currentUser.address || "",
         username: currentUser.username || "",
+        instagram: currentUser.instagram || "",
+        facebook: currentUser.facebook || "",
+        linkedin: currentUser.linkedin || "",
       });
     }
   }, [currentUser]);
@@ -64,7 +70,7 @@ const EditProfile = () => {
 
   const onSubmit = async () => {
     let userData = { ...user };
-    let { name, phoneNumber, address, image, bio, username } = userData;
+    let { name, phoneNumber, address, image, bio, username, instagram, facebook, linkedin } = userData;
 
     if (!name || !phoneNumber || !address || !bio || !username) {
       Alert.alert("Profile", "Please fill all the fields");
@@ -141,7 +147,7 @@ const EditProfile = () => {
               onChangeText={(value) => setUser({ ...user, name: value })}
             />
             <Input
-              icon={<Icon name={"user"} />}
+              icon={<Icon name={"profile"} />}
               placeholder="Enter your userName"
               value={user.username}
               onChangeText={(value) => setUser({ ...user, username: value })}
@@ -159,13 +165,36 @@ const EditProfile = () => {
               onChangeText={(value) => setUser({ ...user, address: value })}
             />
             <Input
+              icon={<Icon name={"instagram"} />}
+              placeholder="Add your Instagram link"
+              value={user.instagram}
+              onChangeText={(value) => setUser({ ...user, instagram: value })}
+            />
+            <Input
+              icon={<Icon name={"facebook"} />}
+              placeholder="Add your Facebook link"
+              value={user.facebook}
+              onChangeText={(value) => setUser({ ...user, facebook: value })}
+            />
+            <Input
+              icon={<Icon name={"linkedin"} />}
+              placeholder="Add your Linkedin link"
+              value={user.linkedin}
+              onChangeText={(value) => setUser({ ...user, linkedin: value })}
+            />
+            <Input
               placeholder="Enter your bio"
               value={user.bio}
               multiline={true}
               containerStyle={styles.bio}
               onChangeText={(value) => setUser({ ...user, bio: value })}
             />
-            <Button title={"Update"} loading={loading} onPress={onSubmit} />
+            <Button
+              buttonSyle={{ marginBottom: 30 }}
+              title={"Update"}
+              loading={loading}
+              onPress={onSubmit}
+            />
           </View>
         </ScrollView>
       </View>
